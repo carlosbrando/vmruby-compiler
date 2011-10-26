@@ -1,24 +1,16 @@
 require "../lib/vmruby"
-require "ripper"
-require "ap"
 require "pp"
 
 src = <<END
   x = 1
-
-  def teste
-    x = 10
-    puts x
-  end
-
-  x = 2
-  z = 3
+  puts x
 END
 
-pp exp = Ripper.sexp(src)
+asm = VMRuby::ASMBuilder.new(src).parse
 
 puts
-puts "---"
-puts
+puts "-" * 30
 
-puts VMRuby::ASMBuilder.new(exp).parse
+asm.each do |i|
+  puts i
+end

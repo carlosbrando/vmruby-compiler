@@ -1,6 +1,6 @@
 module VMRuby
   module MethodStatement    
-    def on_send(args)
+    def on_send(args, previous_command, next_command)
       case args[0]
         when :puts
           [
@@ -12,7 +12,7 @@ module VMRuby
       end
     end
    
-    def on_leave(args)
+    def on_leave(args, previous_command, next_command)
       "jmp leave"
     end 
   end

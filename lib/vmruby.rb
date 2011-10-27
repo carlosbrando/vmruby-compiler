@@ -7,10 +7,11 @@ end
 
 module VMRuby
   class ASMBuilder
-    include VMRuby::SettingStatement, VMRuby::PutStatement, VMRuby::VariableStatement,
-            VMRuby::MethodStatement,  VMRuby::StackStatement
+    include VMRuby::SettingStatement, VMRuby::PutStatement,   VMRuby::VariableStatement,
+            VMRuby::MethodStatement,  VMRuby::StackStatement, VMRuby::OptimizeStatement,
+            VMRuby::JumpStatement
     
-    attr_accessor :source, :current_line
+    attr_accessor :source, :current_line, :position
 
     def initialize(source)
       self.source = RubyVM::InstructionSequence.compile(source).to_a.last
@@ -29,13 +30,24 @@ module VMRuby
    private
     def process(source)
       result = []
+      self.position = 0
       
-      source.each do |command|
-        if command.is_a?(Integer)
-          self.current_line = command
+      while self.position < source.size
+        previous_command = source[self.position - 1]
+        current_command  = source[self.position]
+        next_command     = source[self.position + 1]
+
+        if current_command.is_a?(Integer)
+          self.current_line = current_command
+        elsif current_command.is_a?(Symbol)
+          result << "#{current_command}:"
         else
-          result << send("on_#{command.shift}", command)
+          args  = current_command
+          token = args.shift
+          result << send("on_#{token}", args, previous_command, next_command)
         end
+        
+        self.position += 1
       end
       
       return result.flatten.compact

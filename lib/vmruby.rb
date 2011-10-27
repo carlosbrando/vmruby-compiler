@@ -1,13 +1,14 @@
 require "vmruby/version"
 
 # Load ASTs
-Dir[File.join(File.dirname(__FILE__), 'vmruby', 'ast', '*')].each do |file|
-  require "vmruby/ast/" + File.basename(file, ".rb")
+Dir[File.join(File.dirname(__FILE__), 'vmruby', 'statements', '*')].each do |file|
+  require "vmruby/statements/" + File.basename(file, ".rb")
 end
 
 module VMRuby
   class ASMBuilder
-    # include Method, Assignment, Identifier, Literal
+    include VMRuby::SettingStatement, VMRuby::PutStatement, VMRuby::VariableStatement,
+            VMRuby::MethodStatement,  VMRuby::StackStatement
     
     attr_accessor :source, :current_line
 
@@ -21,44 +22,8 @@ module VMRuby
       return asm
     end
 
-    def on_trace(args)
-      # do nothing
-    end
-    
-    def on_putobject(args)
-      "push #{args[0]}"
-    end
-
-    def on_setlocal(args)
-      "pop [#{args[0]}]"
-    end
-
-    def on_putnil(args)
-      # do nothing
-    end
-    
-    def on_getlocal(args)
-      "push [#{args[0]}]"
-    end
-
-    def on_send(args)
-      case args[0]
-        when :puts
-          [
-            "pop eax",
-            "prn eax"
-          ]
-        else
-          raise "error"
-      end
-    end
-    
-    def on_leave(args)
-      "jmp leave"
-    end
-
     def method_missing(meth, *args, &blk)
-      "#{meth}, #{args.flatten}"
+      "*** Unknown: #{meth}, #{args.flatten} ***"
     end
 
    private
@@ -69,8 +34,7 @@ module VMRuby
         if command.is_a?(Integer)
           self.current_line = command
         else
-          token = command.shift
-          result << send("on_#{token}", command)
+          result << send("on_#{command.shift}", command)
         end
       end
       

@@ -11,16 +11,18 @@ module VMRuby
             VMRuby::MethodStatement,  VMRuby::StackStatement, VMRuby::OptimizeStatement,
             VMRuby::JumpStatement
     
-    attr_accessor :source, :current_line, :position
+    attr_accessor :source, :current_line, :position, :complex_types
 
     def initialize(source)
+      self.complex_types = []
       self.source = RubyVM::InstructionSequence.compile(source).to_a.last
     end
 
     def parse
       asm = process(self.source)
       asm << ["leave:"]
-      return asm
+
+      return [self.complex_types, asm]
     end
 
     def method_missing(meth, *args, &blk)
@@ -39,10 +41,11 @@ module VMRuby
 
         if current_command.is_a?(Integer)
           self.current_line = current_command
+          # result << [" ", "line_#{self.current_line}:"]
         elsif current_command.is_a?(Symbol)
           result << "#{current_command}:"
         else
-          args  = current_command
+          args  = current_command.dup
           token = args.shift
           result << send("on_#{token}", args, previous_command, next_command)
         end

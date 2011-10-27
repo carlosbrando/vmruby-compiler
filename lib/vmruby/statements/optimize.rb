@@ -1,5 +1,41 @@
 module VMRuby
   module OptimizeStatement
+    def on_opt_plus(args, previous_command, next_command)
+      [
+        "pop ebx",
+        "pop eax",
+        "add eax, ebx",
+        "push eax"
+      ]
+    end
+    
+    def on_opt_mult(args, previous_command, next_command)
+      [
+        "pop ebx",
+        "pop eax",
+        "mul eax, ebx",
+        "push eax"
+      ]
+    end
+    
+    def on_opt_minus(args, previous_command, next_command)
+      [
+        "pop ebx",
+        "pop eax",
+        "sub eax, ebx",
+        "push eax"
+      ]
+    end
+    
+    def on_opt_div(args, previous_command, next_command)
+      [
+        "pop ebx",
+        "pop eax",
+        "div eax, ebx",
+        "push eax"
+      ]
+    end
+    
     def on_opt_gt(args, previous_command, next_command)
       asm = [
         "pop ebx",

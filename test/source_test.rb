@@ -2,13 +2,10 @@ require "../lib/vmruby"
 require "pp"
 
 src = <<END
-  x = 15
-  
-  if x == 10 || x > 10
-    puts 1
-  else
-    puts 0
-  end
+  puts "hello, world"
+  puts "teste"
+  # puts 1
+  # puts 2
 END
 
 asm = VMRuby::ASMBuilder.new(src).parse

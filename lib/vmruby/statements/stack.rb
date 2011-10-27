@@ -5,7 +5,7 @@ module VMRuby
     end
     
     def on_pop(args, previous_command, next_command)
-      "pop eax"
+      # "pop eax"
     end
   end
 end

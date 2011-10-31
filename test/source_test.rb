@@ -4,6 +4,7 @@ require "awesome_print"
 src = <<END
 def teste
   puts "teste1"
+  teste2
 end
 
 def teste2

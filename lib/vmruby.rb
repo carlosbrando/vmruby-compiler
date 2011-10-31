@@ -11,18 +11,35 @@ module VMRuby
             VMRuby::MethodStatement,  VMRuby::StackStatement, VMRuby::OptimizeStatement,
             VMRuby::JumpStatement
     
-    attr_accessor :source, :current_line, :position, :complex_types
+    attr_accessor :source, :current_line, :position, :complex_types, :current_scope, :scopes, :variable_count
 
     def initialize(source)
       self.complex_types = []
       self.source = RubyVM::InstructionSequence.compile(source).to_a.last
+      
+      self.current_scope = :start
+      self.scopes = {}
+      self.variable_count = 0
     end
 
     def parse
-      asm = process(self.source)
+      methods = parse_methods
+      asm = ["start:", process(self.source)]
       asm << ["leave:"]
 
-      return [self.complex_types, asm]
+      return [self.complex_types, "\n", methods, asm]
+    end
+
+    def parse_methods
+      methods = self.source.select { |e| e.is_a?(Array) && e.first == :putiseq }
+      methods.collect do |e|
+        name = e.last[5]
+        asm  = process(e.last.last)
+        asm.pop
+        asm << "\tret"
+        
+        ["#{name}:", asm, "\n"]
+      end
     end
 
     def method_missing(meth, *args, &blk)
@@ -53,7 +70,7 @@ module VMRuby
         self.position += 1
       end
       
-      return result.flatten.compact
+      return result.flatten.compact.collect { |e| "\t#{e}" }
     end
     
   end

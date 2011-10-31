@@ -36,6 +36,16 @@ module VMRuby
       ]
     end
     
+    def on_opt_mod(args, previous_command, next_command)
+      [
+        "pop ebx",
+        "pop eax",
+        "mod eax, ebx",
+        "rem eax",
+        "push eax"
+      ]
+    end
+    
     def on_opt_gt(args, previous_command, next_command)
       asm = [
         "pop ebx",

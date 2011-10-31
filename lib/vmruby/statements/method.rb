@@ -7,13 +7,19 @@ module VMRuby
             "pop eax",
             "prn eax"
           ]
+        when :"core#define_method"
+          # do nothing
         else
-          "*** Method unknown: #{args[0]} ***"
+          "call #{args[0]}"
       end
     end
    
     def on_leave(args, previous_command, next_command)
       "jmp leave"
-    end 
+    end
+    
+    def on_putiseq(args, previous_command, next_command)
+      # do nothing
+    end
   end
 end
